@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { createToken } from "@/lib/token-manager";
 import cookie from "cookie";
 import { COOKIE_NAME } from "@/lib/constants";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -36,12 +37,14 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    const token = createToken(existingUser.id, existingUser.email, "1h");
+    const token = createToken(existingUser.id, existingUser.email, "7d");
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 7);
     const cookieOptions: cookie.CookieSerializeOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60, // 1 hour
       path: "/",
+      expires,
       sameSite: "lax",
     };
     const serializedCookies = cookie.serialize(
@@ -60,6 +63,8 @@ export async function POST(req: Request) {
     // localStorage.setItem("token", token);
 
     response.headers.append("Set-Cookie", serializedCookies);
+    cookies().set(COOKIE_NAME, token, cookieOptions);
+    console.log(`Response Headers: ${JSON.stringify(response.headers)}`);
     return response;
   } catch (error) {
     console.error("Error signing in:", error);

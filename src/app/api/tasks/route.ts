@@ -1,6 +1,5 @@
 import { connectToDatabase } from "@/lib/db/connection";
 import task from "@/lib/models/task";
-import { verifyToken } from "@/lib/token-manager";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
