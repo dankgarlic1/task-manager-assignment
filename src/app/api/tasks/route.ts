@@ -7,14 +7,6 @@ export async function POST(req: Request) {
   try {
     await connectToDatabase();
 
-    const user = await verifyToken(req);
-    if (!user || !user.id) {
-      return NextResponse.json(
-        { message: "Unauthorized: Invalid token" },
-        { status: 401 }
-      );
-    }
-
     const { title, description, status, priority, dueDate, userId } =
       await req.json();
     if (!title || !userId) {

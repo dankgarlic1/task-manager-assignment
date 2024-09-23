@@ -53,9 +53,12 @@ export async function POST(req: Request) {
       {
         message: "Login successful",
         user: { id: existingUser.id, email: existingUser.email },
+        token,
       },
       { status: 200 }
     );
+    // localStorage.setItem("token", token);
+
     response.headers.append("Set-Cookie", serializedCookies);
     return response;
   } catch (error) {
