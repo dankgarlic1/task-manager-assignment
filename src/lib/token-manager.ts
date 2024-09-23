@@ -11,26 +11,19 @@ export const createToken = (id: string, email: string, expiresIn: string) => {
   return token;
 };
 
-export const verifyToken = (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  next: () => void
-) => {
+export const verifyToken = (req: NextApiRequest, res: NextApiResponse) => {
   const cookies = cookie.parse(req.headers.cookie || "");
   const token = cookies[COOKIE_NAME];
 
   if (!token || token.trim() === "") {
-    console.log(`Starting verifying the token ${token}`);
     return res.status(401).json({ message: "Token not received" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET!, (err: any, decoded: any) => {
-    if (err) {
-      return res.status(401).json({ message: "Token expired" });
-    } else {
-      console.log("Token Verification Successful");
-
-      next();
-    }
-  });
+  try {
+    // Verifying the token and returning the payload
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    return decoded;
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
 };
