@@ -1,10 +1,17 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
+import { jwtVerify, SignJWT } from "jose";
 
-export const createToken = (id: string, email: string, expiresIn: string) => {
+export const createToken = async (
+  id: string,
+  email: string,
+  expiresIn: string
+) => {
   const payload = { id, email };
-  const jwtSecret = process.env.JWT_SECRET!;
-  const token = jwt.sign(payload, jwtSecret, { expiresIn });
+  const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET!);
+  const token = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(expiresIn)
+    .sign(jwtSecret);
 
   console.log(`Token created ${token}`);
   return token;
@@ -12,10 +19,13 @@ export const createToken = (id: string, email: string, expiresIn: string) => {
 
 export const verifyToken = async (token: string) => {
   try {
-    const jwtSecret = process.env.JWT_SECRET!;
+    // const jwtSecret = process.env.JWT_SECRET!;
+    const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET!);
 
-    const verified = jwt.verify(token, jwtSecret);
-    return verified;
+    const { payload } = await jwtVerify(token, jwtSecret);
+    console.log("Verified Payload:", payload);
+
+    return { payload, token };
   } catch (error) {
     console.log(`error:${error}`);
 

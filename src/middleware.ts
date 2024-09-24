@@ -1,3 +1,4 @@
+//
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/token-manager"; // Import your token manager
 import { COOKIE_NAME } from "./lib/constants";
@@ -6,13 +7,17 @@ export async function middleware(request: NextRequest) {
   const cookieStore = request.cookies; // Access cookies
   const path = request.nextUrl.pathname;
 
-  console.log(`Path accessed: ${path}`); // Log the accessed path
+  console.log(`Path accessed: ${path}`);
 
-  // Define routes that require token verification
+  // Define protected routes
   const protectedPaths = ["/api/tasks", "/api/tasks/*"];
 
-  // If the path is protected, proceed with token verification
-  if (protectedPaths.includes(path)) {
+  // Check if the accessed path is protected
+  const isProtected = protectedPaths.some((protectedPath) =>
+    path.startsWith(protectedPath)
+  );
+
+  if (isProtected) {
     console.log(`Protected path accessed: ${path}`);
 
     const token = cookieStore.get(COOKIE_NAME)?.value; // Get 'token' from cookies
@@ -20,7 +25,7 @@ export async function middleware(request: NextRequest) {
 
     if (!token) {
       // Token is missing
-      console.log("Unauthorized: Token not found"); // Log missing token
+      console.log("Unauthorized: Token not found");
       return NextResponse.json(
         { message: "Unauthorized: Token not found" },
         { status: 401 }
@@ -29,13 +34,22 @@ export async function middleware(request: NextRequest) {
 
     try {
       // Verify the token
-      const verifiedToken = await verifyToken(token);
-      console.log(
-        `Token successfully verified: ${JSON.stringify(verifiedToken)}`
-      ); // Log successful verification
+      const verifiedToken = await verifyToken(token); // Await the result of verifyToken
+      console.log(`Verified token ${verifiedToken.token}`);
+      console.log(`Token from cookie store ${token}`);
 
-      // Token is valid; allow the request to proceed
-      return NextResponse.next();
+      if (verifiedToken.token === token) {
+        console.log(
+          `Token successfully verified: ${JSON.stringify(verifiedToken)}`
+        );
+
+        return NextResponse.next();
+      } else {
+        return NextResponse.json(
+          { message: "Unauthorized: Wrong/corrupted token" },
+          { status: 401 }
+        );
+      }
     } catch (error) {
       // Token verification failed
       console.error(`Token verification failed: ${error}`); // Log error

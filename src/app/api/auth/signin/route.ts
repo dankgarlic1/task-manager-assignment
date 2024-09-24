@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    const token = createToken(existingUser.id, existingUser.email, "7d");
+    const token = await createToken(existingUser.id, existingUser.email, "7d");
     const expires = new Date();
     expires.setDate(expires.getDate() + 7);
     const cookieOptions: cookie.CookieSerializeOptions = {
