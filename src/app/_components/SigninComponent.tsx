@@ -8,16 +8,14 @@ import { Input } from "@/components/ui/input";
 import GlobalApi from "../_services/GlobalApi";
 import { useRouter } from "next/navigation";
 
-const SignupComponent = () => {
+const SigninComponent = () => {
   const router = useRouter();
   const initialValues = {
-    name: "",
     email: "",
     password: "",
   };
 
   const validationSchema = Yup.object({
-    name: Yup.string().required("Name is required"),
     email: Yup.string()
       .email("Invalid email format")
       .required("Email is required"),
@@ -26,21 +24,17 @@ const SignupComponent = () => {
       .required("Password is required"),
   });
 
-  const handleSubmit = async (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => {
+  const handleSubmit = async (data: { email: string; password: string }) => {
     try {
-      const response = await GlobalApi.Signup(data); // Make sure this returns a response
+      const response = await GlobalApi.Signin(data); // Make sure this returns a response
       if (response.status == 201) {
-        router.push("/signin"); // Navigate to the sign-in page on success
+        router.push("/dashboard"); // Navigate to the sign-in page on success
       } else {
         // Handle API errors (optional)
-        console.error(response.data.message || "Signup failed");
+        console.error(response.data.message || "Signin failed");
       }
     } catch (error) {
-      console.error("Signup error:", error);
+      console.error("Signin error:", error);
     }
   };
 
@@ -52,16 +46,6 @@ const SignupComponent = () => {
     >
       {() => (
         <Form className="space-y-4">
-          <div>
-            <label htmlFor="name">Full Name</label>
-            <Field name="name" as={Input} placeholder="Enter your name" />
-            <ErrorMessage
-              name="name"
-              component="div"
-              className="text-red-600"
-            />
-          </div>
-
           <div>
             <label htmlFor="email">Email</label>
             <Field
@@ -95,7 +79,7 @@ const SignupComponent = () => {
             type="submit"
             className="w-full bg-purple-700 text-white text-2xl rounded-sm p-4 hover:bg-purple-800"
           >
-            Sign Up
+            Sign In
           </Button>
         </Form>
       )}
@@ -103,4 +87,4 @@ const SignupComponent = () => {
   );
 };
 
-export default SignupComponent;
+export default SigninComponent;
