@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import { jwtVerify, SignJWT } from "jose";
 
 export const createToken = async (

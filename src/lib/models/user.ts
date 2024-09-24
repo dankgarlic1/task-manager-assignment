@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
   {
     name: {
       type: String,
@@ -15,8 +15,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }], // Array of task references
   },
   { timestamps: true }
 );
 
-export default mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+export default User;
