@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import * as Yup from "yup";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import GlobalApi from "../_services/GlobalApi";
 import { useRouter } from "next/navigation";
 
 const SigninComponent = () => {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const initialValues = {
     email: "",
@@ -26,15 +27,18 @@ const SigninComponent = () => {
 
   const handleSubmit = async (data: { email: string; password: string }) => {
     try {
+      setLoading(true);
       const response = await GlobalApi.Signin(data); // Make sure this returns a response
-      if (response.status == 201) {
-        router.push("/dashboard"); // Navigate to the sign-in page on success
+      if (response.status == 200) {
+        router.push("/signup"); // Navigate to the sign-in page on success
       } else {
         // Handle API errors (optional)
         console.error(response.data.message || "Signin failed");
+        setLoading(false);
       }
     } catch (error) {
       console.error("Signin error:", error);
+      setLoading(false);
     }
   };
 
@@ -79,7 +83,7 @@ const SigninComponent = () => {
             type="submit"
             className="w-full bg-purple-700 text-white text-2xl rounded-sm p-4 hover:bg-purple-800"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </Button>
         </Form>
       )}
